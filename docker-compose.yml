@@ -1,0 +1,32 @@
+services:
+
+  one-frame:
+    image: paidyinc/one-frame
+    ports:
+      - "18080:8080"
+
+  forex-proxy:
+    build: .
+    ports:
+      - "9090:9090"
+    depends_on:
+      - one-frame
+    environment:
+      # These override the defaults in application.conf via HOCON ${?ENV_VAR} substitution.
+      ONE_FRAME_URL: http://one-frame:8080
+      ONE_FRAME_TOKEN: 10dc303535874aeccc86a8251e6992f5
+      APP_HTTP_PORT: 9090
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/rates?from=USD&to=JPY"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - forex-proxy
+      - one-frame

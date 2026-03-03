@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  one-frame:
+    image: paidyinc/one-frame
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "--header", "token: 10dc303535874aeccc86a8251e6992f5", "http://localhost:8080/rates?pair=USDJPY"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  forex-proxy:
+    build: .
+    ports:
+      - "9090:9090"
+    environment:
+      ONE_FRAME_URL: "http://one-frame:8080"
+      ONE_FRAME_TOKEN: "10dc303535874aeccc86a8251e6992f5"
+    depends_on:
+      one-frame:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "-H", "X-Proxy-Token: 10dc303535874aeccc86a8251e699999", "http://localhost:9090/rates?from=USD&to=JPY"]
+      interval: 10s
+      timeout: 5s
+      retries: 12

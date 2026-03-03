@@ -1,0 +1,19 @@
+## Stage 1: build the React app
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+## Stage 2: serve with Nginx
+FROM nginx:alpine
+
+# Replace the default Nginx config with ours (API proxy rules + SPA fallback).
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy the Vite build output.
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+EXPOSE 80
