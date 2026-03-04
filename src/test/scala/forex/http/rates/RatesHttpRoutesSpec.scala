@@ -25,7 +25,9 @@ import org.scalatest.matchers.should.Matchers
  */
 class RatesHttpRoutesSpec extends AnyFunSuite with Matchers {
 
-  implicit val cs: cats.effect.ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
+  private val pool = java.util.concurrent.Executors.newCachedThreadPool()
+  private val ec   = scala.concurrent.ExecutionContext.fromExecutor(pool)
+  implicit val cs: cats.effect.ContextShift[IO] = IO.contextShift(ec)
 
   /** A no-op event bus for tests — discards all published events. */
   private val noopBus: EventBus[IO] = new EventBus[IO] {

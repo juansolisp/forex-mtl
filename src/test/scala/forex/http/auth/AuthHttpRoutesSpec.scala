@@ -12,8 +12,9 @@ import forex.services.auth.AuthService
 
 class AuthHttpRoutesSpec extends AnyFunSuite with Matchers {
 
-  implicit val cs: cats.effect.ContextShift[IO] =
-    IO.contextShift(scala.concurrent.ExecutionContext.global)
+  private val pool = java.util.concurrent.Executors.newCachedThreadPool()
+  private val ec   = scala.concurrent.ExecutionContext.fromExecutor(pool)
+  implicit val cs: cats.effect.ContextShift[IO] = IO.contextShift(ec)
 
   private val cfg = AuthConfig("user@paidy.com", "forex2025")
 

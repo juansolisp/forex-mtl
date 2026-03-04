@@ -19,9 +19,10 @@ import org.scalatest.matchers.should.Matchers
  */
 class EventBusSpec extends AnyFunSuite with Matchers {
 
-  import scala.concurrent.ExecutionContext.global
-  implicit val cs: ContextShift[IO] = IO.contextShift(global)
-  implicit val timer: Timer[IO]     = IO.timer(global)
+  private val pool = java.util.concurrent.Executors.newCachedThreadPool()
+  private val ec   = scala.concurrent.ExecutionContext.fromExecutor(pool)
+  implicit val cs: ContextShift[IO] = IO.contextShift(ec)
+  implicit val timer: Timer[IO]     = IO.timer(ec)
 
   private val sampleRefresh: LogEvent = LogEvent.CacheRefresh(
     pairsCount   = 72,

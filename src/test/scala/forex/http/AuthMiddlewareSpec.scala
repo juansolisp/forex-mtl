@@ -8,8 +8,9 @@ import org.scalatest.matchers.should.Matchers
 
 class AuthMiddlewareSpec extends AnyFunSuite with Matchers {
 
-  implicit val cs: cats.effect.ContextShift[IO] =
-    IO.contextShift(scala.concurrent.ExecutionContext.global)
+  private val pool = java.util.concurrent.Executors.newCachedThreadPool()
+  private val ec   = scala.concurrent.ExecutionContext.fromExecutor(pool)
+  implicit val cs: cats.effect.ContextShift[IO] = IO.contextShift(ec)
 
   private val expectedToken = "10dc303535874aeccc86a8251e699999"
 
